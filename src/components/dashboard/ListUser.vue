@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table  :row-selection="rowSelection" :data-source="data" :columns="columns" rowKey="id">
+    <a-table :row-selection="rowSelection" :data-source="data" :columns="columns" rowKey="id" >
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -53,38 +53,26 @@
           {{ text }}
         </template>
       </template>
+      <template slot="action" slot-scope="text, record">
+        <div class="group__button">
+          <a-button type="primary">
+            Edit
+          </a-button>
+          <a-popconfirm
+            title="Sure to delete?"
+            @confirm="() => onDelete(record.id)"
+          >
+            <a-button type="danger">
+              Delete
+            </a-button>
+          </a-popconfirm>
+        </div>
+      </template>
     </a-table>
+
   </div>
 </template>
 <script>
-
-// const data = [
-//   {
-//     key: '1',
-//     name: 'John Brown',
-//     age: 32,
-//     email: 'New York No. 1 Lake Park',
-//   },
-//   {
-//     key: '2',
-//     name: 'Joe Black',
-//     age: 42,
-//     address: 'London No. 1 Lake Park',
-//   },
-//   {
-//     key: '3',
-//     name: 'Jim Green',
-//     age: 32,
-//     address: 'Sidney No. 1 Lake Park',
-//   },
-//   {
-//     key: '4',
-//     name: 'Jim Red',
-//     age: 32,
-//     address: 'London No. 2 Lake Park',
-//   },
-// ];
-
 
 export default {
   data() {
@@ -118,7 +106,7 @@ export default {
           },
         },
         {
-          title: 'Email',
+          title: 'E-mail',
           dataIndex: 'email',
           key: 'email',
           scopedSlots: {
@@ -138,6 +126,34 @@ export default {
               });
             }
           },
+        },
+        {
+          title: 'Address',
+          dataIndex: 'address',
+          key: 'address',
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+            customRender: 'customRender',
+          },
+          onFilter: (value, record) =>
+            record.address
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.searchInput.focus();
+              });
+            }
+          },
+        },
+        {
+          title: 'action',
+          dataIndex: 'action',
+          key: 'action',
+          scopedSlots: {customRender: 'action'}
         },
       ],
     };
@@ -191,6 +207,9 @@ export default {
     },
   },
   methods: {
+    onDelete(key) {
+      console.log(key);
+    },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
       this.searchText = selectedKeys[0];
@@ -208,7 +227,10 @@ export default {
     },
   },
   mounted() {
-    console.log(this.$store.state.users)
+    this.$store.dispatch('fetchUser')
+    setTimeout(() => {
+      this.data = this.$store.state.users.listUser
+    }, 1000);
   }
 }
 </script>
@@ -216,5 +238,13 @@ export default {
   .highlight {
     background-color: rgb(255, 192, 105);
     padding: 0px;
+  }
+  .group__button {
+    text-align: center;
+    button {
+      &:nth-child(1) {
+        margin-right: 10px;
+      }
+    }
   }
 </style>

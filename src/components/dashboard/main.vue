@@ -44,9 +44,6 @@ export default ({
         collapsed: false,
       };
     },
-    mounted() {
-      this.$store.dispatch('fetchUser')
-    },
     computed: {  // luoon chayj truowcs
       user () {
         console.log(this.$store.state.users.listUser)
