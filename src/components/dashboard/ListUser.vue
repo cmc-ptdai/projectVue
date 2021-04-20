@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div class="titleTable">
+      <button> create user</button>
+    </div>
     <a-table :row-selection="rowSelection" :data-source="data" :columns="columns" rowKey="id" >
       <div
         slot="filterDropdown"
@@ -55,7 +58,7 @@
       </template>
       <template slot="action" slot-scope="text, record">
         <div class="group__button">
-          <a-button type="primary">
+          <a-button type="primary" @click="editUser(record)">
             Edit
           </a-button>
           <a-popconfirm
@@ -70,18 +73,25 @@
       </template>
     </a-table>
 
+    <div >
+      <a-modal v-model="visible" title="Basic Modal" @ok="handleOk" class="my-modal" >
+        <MyForm></MyForm>
+      </a-modal>
+    </div>
   </div>
 </template>
 <script>
+import MyForm from './form';
 
 export default {
   data() {
     return {
+      visible:  this.getIsModal,
       data: [],
       searchText: '',
       searchInput: null,
-      searchedColumn: '',
       selectedRowKeys: [],
+      dataSelect: '',
       columns: [
         {
           title: 'Name',
@@ -102,6 +112,28 @@ export default {
               setTimeout(() => {
                 this.searchInput.focus();
               }, 0);
+            }
+          },
+        },
+        {
+          title: 'UserName',
+          dataIndex: 'userName',
+          key: 'username',
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+            customRender: 'customRender',
+          },
+          onFilter: (value, record) =>
+            record.address
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.searchInput.focus();
+              });
             }
           },
         },
@@ -150,6 +182,28 @@ export default {
           },
         },
         {
+          title: 'Phone',
+          dataIndex: 'phone',
+          key: 'phone',
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+            customRender: 'customRender',
+          },
+          onFilter: (value, record) =>
+            record.address
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.searchInput.focus();
+              });
+            }
+          },
+        },
+        {
           title: 'action',
           dataIndex: 'action',
           key: 'action',
@@ -157,6 +211,15 @@ export default {
         },
       ],
     };
+  },
+
+  watch: {
+    visible() {
+      this.$store.commit("SET_IS_MODAL",this.visible)
+    }
+  },
+  components: {
+    MyForm
   },
   computed: {
     rowSelection() {
@@ -205,6 +268,9 @@ export default {
         onSelection: this.onSelection,
       };
     },
+    getIsModal() {
+      return this.$store.getters.getIsModal
+    }
   },
   methods: {
     onDelete(key) {
@@ -225,6 +291,13 @@ export default {
       clearFilters();
       this.searchText = '';
     },
+    editUser(record) {
+      this.visible = true
+      this.$store.commit('SET_DATA', record);
+    },
+    handleOk() {
+      this.visible = false
+    },
   },
   mounted() {
     this.$store.dispatch('fetchUser')
@@ -234,7 +307,15 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
+  .my-modal {
+    .ant-modal {
+      width: 50% !important;
+    }
+    .ant-modal-footer {
+      display: none;
+    }
+  }
   .highlight {
     background-color: rgb(255, 192, 105);
     padding: 0px;
@@ -245,6 +326,20 @@ export default {
       &:nth-child(1) {
         margin-right: 10px;
       }
+    }
+  }
+  .titleTable {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    button {
+      border-radius: 10px;
+      border: none;
+      background-color: #ccc;
+      padding: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
     }
   }
 </style>

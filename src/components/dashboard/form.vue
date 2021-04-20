@@ -12,7 +12,14 @@
           v-decorator="[
             'name',
             {
-              rules: [{ required: true, message: 'Please input your name!', whitespace: true }],
+              initialValue: this.getDataUser.name || '',
+              rules: [
+                {
+                  required: true,
+                  message: 'Please input your name!',
+                  whitespace: true,
+                },
+              ],
             },
           ]"
         />
@@ -22,6 +29,7 @@
           v-decorator="[
             'email',
             {
+              initialValue: this.getDataUser.email || '',
               rules: [
                 {
                   type: 'email',
@@ -45,9 +53,16 @@
         </span>
         <a-input
           v-decorator="[
-            'username',
+            'userName',
             {
-              rules: [{ required: true, message: 'Please input your nickname!', whitespace: true }],
+              initialValue: this.getDataUser.userName || '',
+              rules: [
+                {
+                  required: true,
+                  message: 'Please input your nickname!',
+                  whitespace: true,
+                },
+              ],
             },
           ]"
         />
@@ -57,6 +72,7 @@
           v-decorator="[
             'password',
             {
+              initialValue: this.getDataUser.password || '',
               rules: [
                 {
                   required: true,
@@ -71,11 +87,16 @@
           type="password"
         />
       </a-form-item>
-      <a-form-item v-bind="formItemLayout" label="Confirm Password" has-feedback>
+      <a-form-item
+        v-bind="formItemLayout"
+        label="Confirm Password"
+        has-feedback
+      >
         <a-input
           v-decorator="[
             'confirm',
             {
+              initialValue: this.getDataUser.password || '',
               rules: [
                 {
                   required: true,
@@ -97,7 +118,10 @@
           v-decorator="[
             'phone',
             {
-              rules: [{ required: true, message: 'Please input your phone number!' }],
+              initialValue: this.getDataUser.phone || '',
+              rules: [
+                { required: true, message: 'Please input your phone number!' },
+              ],
             },
           ]"
           style="width: 100%"
@@ -107,16 +131,9 @@
             v-decorator="['prefix', { initialValue: '84' }]"
             style="width: 70px"
           >
-            <a-select-option value="84">
-              +84
-            </a-select-option>
-            <a-select-option value="86">
-              +86
-            </a-select-option>
-            <a-select-option value="87">
-              +87
-            </a-select-option>
-
+            <a-select-option value="84"> +84 </a-select-option>
+            <a-select-option value="86"> +86 </a-select-option>
+            <a-select-option value="87"> +87 </a-select-option>
           </a-select>
         </a-input>
       </a-form-item>
@@ -128,7 +145,11 @@
             {
               initialValue: ['haiduong', 'kinhmon', 'anphu'],
               rules: [
-                { type: 'array', required: true, message: 'Please select your habitual residence!' },
+                {
+                  type: 'array',
+                  required: true,
+                  message: 'Please select your habitual residence!',
+                },
               ],
             },
           ]"
@@ -138,98 +159,80 @@
 
       <a-form-item v-bind="formItemLayout" label="Gender">
         <a-select
-            v-decorator="[
-              'prefix',
-              { initialValue: '0',
-                rules: [
-                  {required: true, message: 'Please select your gender!' },
-                ],
-              },
-
-            ]"
-          >
-            <a-select-option value="0">
-              Nam
-            </a-select-option>
-            <a-select-option value="1">
-              Nữ
-            </a-select-option>
-          </a-select>
-      </a-form-item>
-
-      <a-form-item v-bind="formItemLayout" label="Website">
-        <a-auto-complete
-          v-decorator="['website', { rules: [{ required: true, message: 'Please input website!' }] }]"
-          placeholder="website"
-          @change="handleWebsiteChange"
+          v-decorator="[
+            'gender',
+            {
+              initialValue: this.getDataUser.gender || 0,
+              rules: [
+                { required: true, message: 'Please select your gender!' },
+              ],
+            },
+          ]"
         >
-          <template slot="dataSource">
-            <a-select-option v-for="website in autoCompleteResult" :key="website">
-              {{ website }}
-            </a-select-option>
-          </template>
-          <a-input />
-        </a-auto-complete>
+          <a-select-option value="0"> Nam </a-select-option>
+          <a-select-option value="1"> Nữ </a-select-option>
+        </a-select>
       </a-form-item>
-      <a-form-item v-bind="tailFormItemLayout">
-        <a-button type="primary" html-type="submit">
-          Register
-        </a-button>
+
+      <a-form-item v-bind="buttonFormItemLayout" class="buttonSunbmit">
+        <a-button type="danger" html-type="submit"> Xác nhận </a-button>
       </a-form-item>
     </a-form>
   </div>
 </template>
 <script>
+import moment from 'moment';
+import axios from 'axios'
 
 const address = [
   {
-    value: 'zhejiang',
-    label: 'Zhejiang',
+    value: "zhejiang",
+    label: "Zhejiang",
     children: [
       {
-        value: 'hangzhou',
-        label: 'Hangzhou',
+        value: "hangzhou",
+        label: "Hangzhou",
         children: [
           {
-            value: 'xihu',
-            label: 'West Lake',
+            value: "xihu",
+            label: "West Lake",
           },
         ],
       },
     ],
   },
   {
-    value: 'jiangsu',
-    label: 'Jiangsu',
+    value: "jiangsu",
+    label: "Jiangsu",
     children: [
       {
-        value: 'nanjing',
-        label: 'Nanjing',
+        value: "nanjing",
+        label: "Nanjing",
         children: [
           {
-            value: 'zhonghuamen',
-            label: 'Zhong Hua Men',
+            value: "zhonghuamen",
+            label: "Zhong Hua Men",
           },
         ],
       },
     ],
   },
   {
-    value: 'haiduong',
-    label: 'Hải Dương',
+    value: "haiduong",
+    label: "Hải Dương",
     children: [
       {
-        value: 'kinhmon',
-        label: 'Kinh Môn',
+        value: "kinhmon",
+        label: "Kinh Môn",
         children: [
           {
-            value: 'anphu',
-            label: 'An Phụ',
+            value: "anphu",
+            label: "An Phụ",
           },
         ],
       },
     ],
-  }
+  },
 ];
 
 export default {
@@ -238,14 +241,16 @@ export default {
       confirmDirty: false,
       address,
       autoCompleteResult: [],
+      user: {},
+
       formItemLayout: {
         labelCol: {
           xs: { span: 24 },
-          sm: { span: 4 },
+          sm: { span: 5 },
         },
         wrapperCol: {
           xs: { span: 24 },
-          sm: { span: 15 },
+          sm: { span: 18 },
         },
       },
       tailFormItemLayout: {
@@ -260,11 +265,33 @@ export default {
           },
         },
       },
+      buttonFormItemLayout: {
+        wrapperCol: {
+          xs: {
+            span: 24,
+            offset: 0,
+          },
+          sm: {
+            span: 16,
+            offset: 6,
+          },
+        },
+      },
     };
   },
 
   beforeCreate() {
-    this.form = this.$form.createForm(this, { name: 'register' });
+    this.form = this.$form.createForm(this, { name: "register" });
+  },
+
+  computed: {
+    getDataUser() {
+      this.form.resetFields();
+      return this.$store.getters.getDataUser
+    },
+  },
+  updated() {
+    this.user = this.getDataUser;
   },
 
   methods: {
@@ -272,7 +299,22 @@ export default {
       e.preventDefault();
       this.form.validateFieldsAndScroll((err, values) => {
         if (!err) {
-          console.log('Received values of form: ', values);
+          const valueUpdate = {
+            ...this.getDataUser,
+            email: values.email,
+            gender: values.gender,
+            name: values.name,
+            phone: values.phone,
+            password: values.password,
+            userName: values.userName,
+            dateUpdate: moment().format(),
+          }
+
+          axios.put(`http://localhost:3004/users/${valueUpdate.id}`,valueUpdate)
+          .then(response =>{
+            console.log(response);
+            this.$store.dispatch('fetchUser')
+          })
         }
       });
     },
@@ -284,8 +326,8 @@ export default {
 
     compareToFirstPassword(rule, value, callback) {
       const form = this.form;
-      if (value && value !== form.getFieldValue('password')) {
-        callback('Two passwords that you enter is inconsistent!');
+      if (value && value !== form.getFieldValue("password")) {
+        callback("Two passwords that you enter is inconsistent!");
       } else {
         callback();
       }
@@ -294,26 +336,24 @@ export default {
     validateToNextPassword(rule, value, callback) {
       const form = this.form;
       if (value && this.confirmDirty) {
-        form.validateFields(['confirm'], { force: true });
+        form.validateFields(["confirm"], { force: true });
       }
       callback();
     },
-
-    handleWebsiteChange(value) {
-      let autoCompleteResult;
-      if (!value) {
-        autoCompleteResult = [];
-      } else {
-        autoCompleteResult = ['.com', '.org', '.net'].map(domain => `${value}${domain}`);
-      }
-      this.autoCompleteResult = autoCompleteResult;
-    },
   },
-}
+};
 </script>
 <style scoped lang="scss">
- .form {
-   width: 60%;
-   margin: auto;
- }
+.form {
+  margin: auto;
+  width: 80%;
+  .buttonSunbmit {
+    button {
+      width: 400px;
+      height: 50px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+  }
+}
 </style>

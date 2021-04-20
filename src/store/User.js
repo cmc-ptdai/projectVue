@@ -21,12 +21,7 @@ const actions = {
   async fetchUser({ commit }) {
     await axios.get('http://localhost:3004/users')
     .then (response => {
-      return response
-    })
-    .then((response) => {
-      setTimeout(() => {
-        commit("SET_USER", response.data);
-      }, 500);
+      commit("SET_USER", response.data);
     })
   }
 }
