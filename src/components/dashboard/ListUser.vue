@@ -1,9 +1,10 @@
 <template>
   <div>
     <div class="titleTable">
-      <button> create user</button>
+      <button @click="addUser">Create user</button>
+      <button v-if="selectedRowKeys.length" @click="deleteListuser">Delete Users</button>
     </div>
-    <a-table :row-selection="rowSelection" :data-source="data" :columns="columns" rowKey="id" >
+    <a-table :row-selection="rowSelection" :data-source="this.getListUser" :columns="columns" rowKey="id" >
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -77,17 +78,23 @@
       <a-modal v-model="visible" title="Basic Modal" @ok="handleOk" class="my-modal" >
         <MyForm></MyForm>
       </a-modal>
+      <a-modal v-model="visibleAdd" title="Create user" @ok="handleOk" class="my-modal" >
+        <AddUser></AddUser>
+      </a-modal>
     </div>
   </div>
 </template>
 <script>
+import axios from 'axios';
 import MyForm from './form';
+import EventBus from '../../EventBus';
+import AddUser from './AddUser';
 
 export default {
   data() {
     return {
       visible:  this.getIsModal,
-      data: [],
+      visibleAdd : false,
       searchText: '',
       searchInput: null,
       selectedRowKeys: [],
@@ -204,6 +211,28 @@ export default {
           },
         },
         {
+          title: 'Date update',
+          dataIndex: 'dateUpdate',
+          key: 'dateUpdate',
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+            customRender: 'customRender',
+          },
+          onFilter: (value, record) =>
+            record.address
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.searchInput.focus();
+              });
+            }
+          },
+        },
+        {
           title: 'action',
           dataIndex: 'action',
           key: 'action',
@@ -216,12 +245,28 @@ export default {
   watch: {
     visible() {
       this.$store.commit("SET_IS_MODAL",this.visible)
-    }
+    },
+    // visibleAdd() {
+    //   EventBus.$emit('isModalAddUserClose', this.visibleAdd)
+    // }
   },
   components: {
-    MyForm
+    MyForm,
+    AddUser
+  },
+  created() {
+    EventBus.$on('isModal', (status) => {
+      this.visible = status
+    });
+    EventBus.$on('isModalAddUser', (status) => {
+      this.visibleAdd = status
+    })
+
   },
   computed: {
+    getListUser() {
+       return this.$store.state.users.listUser
+    },
     rowSelection() {
       const { selectedRowKeys } = this;
       return {
@@ -273,9 +318,33 @@ export default {
     }
   },
   methods: {
+
     onDelete(key) {
-      console.log(key);
+      axios.delete(`http://localhost:3004/users/${key}`)
+      .then (() => {
+        this.$store.dispatch('fetchUser')
+      })
     },
+
+    async deleteListuser() {
+      await this.selectedRowKeys.forEach(async idUser => {
+        await axios.delete(`http://localhost:3004/users/${idUser}`)
+        .then (() => {
+          console.log('ok');
+        })
+        .catch ((err) => {
+          console.log(err);
+        })
+      });
+
+      this.selectedRowKeys = []
+      await this.$store.dispatch('fetchUser')
+    },
+
+    addUser() {
+      this.visibleAdd = true
+    },
+
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
       this.searchText = selectedKeys[0];
@@ -283,7 +352,7 @@ export default {
     },
 
     onSelectChange(selectedRowKeys) {
-      console.log('selectedRowKeys changed: ', selectedRowKeys);
+      console.log(selectedRowKeys);
       this.selectedRowKeys = selectedRowKeys;
     },
 
@@ -291,19 +360,19 @@ export default {
       clearFilters();
       this.searchText = '';
     },
+
     editUser(record) {
       this.visible = true
       this.$store.commit('SET_DATA', record);
     },
+
     handleOk() {
       this.visible = false
     },
+
   },
   mounted() {
     this.$store.dispatch('fetchUser')
-    setTimeout(() => {
-      this.data = this.$store.state.users.listUser
-    }, 1000);
   }
 }
 </script>
@@ -331,6 +400,7 @@ export default {
   .titleTable {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 20px;
     button {
       border-radius: 10px;
@@ -340,6 +410,7 @@ export default {
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
+      outline: none;
     }
   }
 </style>

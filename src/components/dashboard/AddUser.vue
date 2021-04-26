@@ -12,7 +12,7 @@
           v-decorator="[
             'name',
             {
-              initialValue: this.getDataUser.name || '',
+              initialValue: '',
               rules: [
                 {
                   required: true,
@@ -29,7 +29,7 @@
           v-decorator="[
             'email',
             {
-              initialValue: this.getDataUser.email || '',
+              initialValue: '',
               rules: [
                 {
                   type: 'email',
@@ -55,7 +55,7 @@
           v-decorator="[
             'userName',
             {
-              initialValue: this.getDataUser.userName || '',
+              initialValue: '',
               rules: [
                 {
                   required: true,
@@ -72,7 +72,7 @@
           v-decorator="[
             'password',
             {
-              initialValue: this.getDataUser.password || '',
+              initialValue: '',
               rules: [
                 {
                   required: true,
@@ -96,7 +96,7 @@
           v-decorator="[
             'confirm',
             {
-              initialValue: this.getDataUser.password || '',
+              initialValue: '',
               rules: [
                 {
                   required: true,
@@ -118,7 +118,7 @@
           v-decorator="[
             'phone',
             {
-              initialValue: this.getDataUser.phone || '',
+              initialValue: '',
               rules: [
                 { required: true, message: 'Please input your phone number!' },
               ],
@@ -126,7 +126,7 @@
           ]"
           style="width: 100%"
         >
-          <a-select
+          <!-- <a-select
             slot="addonBefore"
             v-decorator="['prefix', { initialValue: '84' }]"
             style="width: 70px"
@@ -134,7 +134,7 @@
             <a-select-option value="84"> +84 </a-select-option>
             <a-select-option value="86"> +86 </a-select-option>
             <a-select-option value="87"> +87 </a-select-option>
-          </a-select>
+          </a-select> -->
         </a-input>
       </a-form-item>
 
@@ -162,7 +162,7 @@
           v-decorator="[
             'gender',
             {
-              initialValue: this.getDataUser.gender,
+              initialValue: '0',
               rules: [
                 { required: true, message: 'Please select your gender!' },
               ],
@@ -174,12 +174,14 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item v-bind="buttonFormItemLayout" class="buttonSunbmit">
-        <a-button type="danger" html-type="submit"> Xác nhận </a-button>
+      <a-form-item class="buttonSunbmit">
+        <a-button type="primary" html-type="submit"> Xác nhận </a-button>
+        <a-button type="danger" @click="resetFrom" >Reset</a-button>
       </a-form-item>
     </a-form>
   </div>
 </template>
+
 <script>
 import moment from 'moment';
 import axios from 'axios';
@@ -243,7 +245,6 @@ export default {
       address,
       autoCompleteResult: [],
       user: {},
-
       formItemLayout: {
         labelCol: {
           xs: { span: 24 },
@@ -266,60 +267,51 @@ export default {
           },
         },
       },
-      buttonFormItemLayout: {
-        wrapperCol: {
-          xs: {
-            span: 24,
-            offset: 0,
-          },
-          sm: {
-            span: 16,
-            offset: 6,
-          },
-        },
-      },
     };
+  },
+  created() {
+    // EventBus.$on('isModalAddUserClose', (status) => {
+    //   if(status === false) {
+    //     this.form.resetFields();
+    //   }
+    // });
   },
 
   beforeCreate() {
     this.form = this.$form.createForm(this, { name: "register" });
   },
 
-  computed: {
-    getDataUser() {
-      this.form.resetFields();
-      return this.$store.getters.getDataUser
-    },
-  },
-  updated() {
-    this.user = this.getDataUser;
-  },
-
-  methods: {
-    handleSubmit(e) {
+   methods: {
+    async handleSubmit(e) {
       e.preventDefault();
       this.form.validateFieldsAndScroll((err, values) => {
         if (!err) {
-          const valueUpdate = {
-            ...this.getDataUser,
-            email: values.email,
-            gender: values.gender,
-            name: values.name,
-            phone: values.phone,
-            password: values.password,
-            userName: values.userName,
-            dateUpdate: moment().format(),
-          }
+          console.log(values);
 
-          axios.put(`http://localhost:3004/users/${valueUpdate.id}`,valueUpdate)
+          axios.post(`http://localhost:3004/users`,
+            {
+              ...values,
+              dateUpdate: moment().format(),
+              dateCreate: moment().format(),
+              cart: [],
+              oder: [],
+            }
+          )
           .then( () =>{
             this.$store.dispatch('fetchUser')
           })
-          EventBus.$emit('isModal', false);
+          .catch((err) => {
+            console.log(err)
+          })
+          EventBus.$emit('isModalAddUser', false);
+          this.form.resetFields();
         }
       });
     },
 
+    resetFrom() {
+      this.form.resetFields();
+    },
     handleConfirmBlur(e) {
       const value = e.target.value;
       this.confirmDirty = this.confirmDirty || !!value;
@@ -342,19 +334,22 @@ export default {
       callback();
     },
   },
-};
-</script>
-<style scoped lang="scss">
-.form {
-  margin: auto;
-  width: 80%;
-  .buttonSunbmit {
-    button {
-      width: 400px;
-      height: 50px;
-      font-size: 20px;
-      font-weight: 600;
-    }
-  }
 }
+</script>
+
+<style scoped lang="scss">
+  .buttonSunbmit {
+    width: 50%;
+    margin: auto;
+    .ant-form-item-children {
+      button {
+        width: 20%;
+        height: 40px;
+        &:nth-child(2) {
+          margin-left: 270px;
+        }
+      }
+    }
+
+  }
 </style>

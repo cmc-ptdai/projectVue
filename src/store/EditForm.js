@@ -24,7 +24,6 @@ const mutations = {
   },
   SET_IS_MODAL(state , payload) {
     state.isModal = payload
-    console.log(state.isModal);
   }
 }
 
