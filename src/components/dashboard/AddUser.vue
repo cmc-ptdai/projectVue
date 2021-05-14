@@ -297,7 +297,8 @@ export default {
               oder: [],
             }
           )
-          .then( () =>{
+          .then( (res) =>{
+            console.log('ádasd', res);
             this.$store.dispatch('fetchUser')
           })
           .catch((err) => {

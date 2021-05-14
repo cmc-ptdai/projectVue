@@ -30,12 +30,6 @@
       >
         <ListUser />
       </a-layout-content>
-      <div>
-        <a-date-picker @change="onChange" />
-        <br />
-        <a-month-picker placeholder="Select month" @change="onChange" />
-        <br />
-      </div>
     </a-layout>
   </a-layout>
 
